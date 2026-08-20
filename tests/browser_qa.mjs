@@ -10,6 +10,7 @@ const { chromium } = require("playwright");
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(.:)/, "$1")), "..");
 const defaultHtml = path.join(root, "docs", "index.html");
 const defaultUrl = pathToFileURL(defaultHtml).href;
+const templateUrl = pathToFileURL(path.join(root, "source", "index.template.html")).href;
 const outputDir = path.join(root, "test_artifacts", "screenshots");
 const urlIndex = process.argv.indexOf("--url");
 const targetUrl = urlIndex >= 0 ? process.argv[urlIndex + 1] : defaultUrl;
@@ -47,13 +48,13 @@ async function exerciseCalculator(page) {
   await page.locator("#calculate-button").click();
   expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical-only display mismatch");
   expect((await page.locator("#mmef-probability").textContent()).trim() === "—", "MMEF result should be unavailable");
-  expect((await page.locator("#mmef-result-note").textContent()).includes("Enter MMEF"), "Missing-MMEF instruction absent");
+  expect((await page.locator("#mmef-result-note").textContent()).includes("Optional MMEF not entered"), "Missing-MMEF instruction absent");
 
   await page.locator("#mmef").fill("60");
   await page.locator("#calculate-button").click();
   expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical result changed after MMEF entry");
   expect((await page.locator("#mmef-probability").textContent()).trim() === "6.6%", "MMEF display mismatch");
-  expect((await page.locator("#probability-difference").textContent()).includes("+0.0 percentage points"), "Difference display mismatch");
+  expect((await page.locator("#mmef-result-note").textContent()).includes("With post-bronchodilator MMEF"), "MMEF result note mismatch");
 
   await page.locator("#mmef").fill("201");
   await page.locator("#calculate-button").click();
@@ -73,7 +74,7 @@ async function exerciseCalculator(page) {
 
 async function runBrowser(channel) {
   const browser = await chromium.launch({ channel, headless: true });
-  const browserResult = { channel, viewports: [] };
+  const browserResult = { channel, viewports: [], templateFailureMessage: null };
   try {
     for (const viewport of viewports) {
       const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
@@ -89,14 +90,28 @@ async function runBrowser(channel) {
         documentWidth: document.documentElement.scrollWidth,
         viewportWidth: document.documentElement.clientWidth,
         bodyWidth: document.body.scrollWidth,
+        edWidth: document.getElementById("ed-days").getBoundingClientRect().width,
+        mmefWidth: document.getElementById("mmef").getBoundingClientRect().width,
       }));
       expect(layout.documentWidth <= layout.viewportWidth, `${channel} ${viewport.name} has horizontal overflow`);
       expect(layout.bodyWidth <= layout.viewportWidth, `${channel} ${viewport.name} body has horizontal overflow`);
+      expect(Math.abs(layout.edWidth - 170) < 0.5, `${channel} ${viewport.name} ED width is not 170 px`);
+      expect(Math.abs(layout.mmefWidth - 170) < 0.5, `${channel} ${viewport.name} MMEF width is not 170 px`);
       const nonDocumentRequests = requests.filter((requestUrl) => requestUrl !== targetUrl);
       expect(nonDocumentRequests.length === 0, `${channel} made external/subresource requests: ${nonDocumentRequests.join(", ")}`);
       const screenshot = path.join(outputDir, `${channel}-${viewport.name}.png`);
       await page.screenshot({ path: screenshot, fullPage: true });
       browserResult.viewports.push({ ...viewport, layout, requests: requests.length, screenshot });
+      await context.close();
+    }
+    if (targetUrl === defaultUrl) {
+      const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+      const page = await context.newPage();
+      await page.goto(templateUrl, { waitUntil: "load" });
+      await completeRequiredClinicalInputs(page);
+      await page.locator("#calculate-button").click();
+      expect(await page.locator("#calculation-error").isVisible(), `${channel} template did not show its initialization error`);
+      browserResult.templateFailureMessage = (await page.locator("#calculation-error").textContent()).trim();
       await context.close();
     }
   } finally {
