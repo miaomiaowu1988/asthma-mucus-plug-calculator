@@ -79,7 +79,7 @@
     }
 
     .header-inner {
-      padding: 30px 0 26px;
+      padding: 24px 0 20px;
     }
 
     .version-line {
@@ -111,7 +111,7 @@
     }
 
     .page-shell {
-      padding: 28px 0 18px;
+      padding: 20px 0 14px;
     }
 
     .calculator {
@@ -122,7 +122,7 @@
     }
 
     .calculator-section {
-      padding: 26px;
+      padding: 22px 24px;
     }
 
     .calculator-section + .calculator-section {
@@ -130,7 +130,7 @@
     }
 
     .section-heading {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .section-heading h2 {
@@ -148,7 +148,7 @@
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 20px 22px;
+      gap: 16px 20px;
     }
 
     .field-group {
@@ -211,6 +211,14 @@
       background: var(--surface);
       border: 1px solid var(--border-strong);
       border-radius: var(--radius);
+    }
+
+    .compact-number {
+      width: min(100%, 170px) !important;
+    }
+
+    .runtime-error {
+      margin-top: 12px;
     }
 
     input[type="number"]:hover,
@@ -285,7 +293,7 @@
     .form-actions {
       display: flex;
       gap: 10px;
-      margin-top: 24px;
+      margin-top: 14px;
     }
 
     .form-actions button {
@@ -353,17 +361,9 @@
     }
 
     .result-note {
-      min-height: 22px;
-      margin: 5px 0 0;
+      margin: 4px 0 0;
       color: var(--muted);
       font-size: 0.8125rem;
-    }
-
-    .difference-line {
-      min-height: 25px;
-      margin: 13px 0 0;
-      color: var(--muted);
-      font-size: 0.875rem;
     }
 
     .concurrent-note {
@@ -438,7 +438,7 @@
     }
 
     .source-block {
-      padding: 22px 4px 4px;
+      padding: 14px 4px 0;
       color: var(--muted);
       font-size: 0.875rem;
     }
@@ -448,7 +448,7 @@
     }
 
     .page-footer {
-      padding: 18px 0 34px;
+      padding: 12px 0 26px;
       color: var(--muted);
       font-size: 0.8125rem;
     }
@@ -542,7 +542,7 @@
       <section class="calculator-section" aria-labelledby="clinical-heading">
         <div class="section-heading">
           <h2 id="clinical-heading">Clinical information</h2>
-          <p>Fields marked <span class="required-mark">*</span> are required for the clinical model.</p>
+          <p><span class="required-mark">*</span> Required.</p>
         </div>
 
         <form id="calculator-form" novalidate>
@@ -553,8 +553,8 @@
           <div class="form-grid">
             <div class="field-group full-width">
               <label for="ed-days">Asthma-related ED patient-days in the preceding 365 days <span class="required-mark">*</span></label>
-              <input id="ed-days" name="ed_patient_days" type="number" min="0" max="365" step="1" inputmode="numeric" autocomplete="off">
-              <p class="field-note">Number of days with at least one asthma-related emergency department encounter.</p>
+              <input id="ed-days" class="compact-number" name="ed_patient_days" type="number" min="0" max="365" step="1" inputmode="numeric" autocomplete="off">
+              <p class="field-note">Days with ≥1 asthma-related ED encounter.</p>
               <p id="ed-days-error" class="field-error" hidden>Enter an integer from 0 to 365.</p>
             </div>
 
@@ -568,7 +568,7 @@
             </fieldset>
 
             <div class="field-group">
-              <label for="gina-step">GINA treatment step <span class="required-mark">*</span></label>
+              <label for="gina-step">GINA 2026 treatment step <span class="required-mark">*</span></label>
               <select id="gina-step" name="gina_step">
                 <option value="" selected>Select</option>
                 <option value="1">Step 1</option>
@@ -577,7 +577,6 @@
                 <option value="4">Step 4</option>
                 <option value="5">Step 5</option>
               </select>
-              <p class="field-note">GINA 2026 treatment step.</p>
               <p id="gina-step-error" class="field-error" hidden>Select Step 1 through Step 5.</p>
             </div>
 
@@ -613,8 +612,8 @@
 
             <div class="field-group full-width">
               <label for="mmef">Post-bronchodilator MMEF, % predicted</label>
-              <input id="mmef" name="mmef_percent_predicted" type="number" min="0" step="0.1" inputmode="decimal" autocomplete="off">
-              <p class="field-note">Optional. GLI-2012 reference equations.</p>
+              <input id="mmef" class="compact-number" name="mmef_percent_predicted" type="number" min="0" step="0.1" inputmode="decimal" autocomplete="off">
+              <p class="field-note">Optional · GLI-2012.</p>
               <p id="mmef-error" class="field-error" hidden>Enter a nonnegative number or leave the field blank.</p>
               <p id="mmef-warning" class="field-warning" hidden>Please verify this value; it is above 200% predicted.</p>
             </div>
@@ -624,29 +623,31 @@
             <button id="calculate-button" class="primary-button" type="submit">Calculate</button>
             <button id="reset-button" class="secondary-button" type="reset">Reset</button>
           </div>
+          <div id="calculation-error" class="form-summary-error runtime-error" role="alert" hidden>
+            Calculator could not initialize. Open docs/index.html (not source/index.template.html), or refresh the deployed page.
+          </div>
         </form>
       </section>
 
       <section class="calculator-section results-section" aria-labelledby="results-heading">
         <div class="section-heading">
-          <h2 id="results-heading">Estimated probability of concurrent high mucus plug burden</h2>
+          <h2 id="results-heading">Estimated probability of high mucus plug burden</h2>
         </div>
 
         <div class="result-grid" aria-live="polite">
           <div class="result-item">
             <span class="result-label">Clinical model</span>
             <strong id="clinical-probability" class="probability">—</strong>
-            <p class="result-note">Six required clinical variables.</p>
+
           </div>
           <div class="result-item">
             <span class="result-label">Clinical model with MMEF</span>
             <strong id="mmef-probability" class="probability">—</strong>
-            <p id="mmef-result-note" class="result-note">Enter MMEF to calculate.</p>
+            <p id="mmef-result-note" class="result-note">Optional MMEF not entered.</p>
           </div>
         </div>
 
-        <p id="probability-difference" class="difference-line"></p>
-        <p class="concurrent-note">This model estimates concurrent high CT mucus plug burden and does not predict future mucus plug development.</p>
+        <p class="concurrent-note">Concurrent CT outcome: 18-segment mucus plug score ≥4. Not a future-risk model.</p>
       </section>
     </div>
 
@@ -663,7 +664,7 @@
             <tr><td>Brier score</td><td>0.144</td><td>0.126</td></tr>
           </tbody>
         </table>
-        <p class="details-note">Performance was estimated using repeated out-of-fold evaluation in the development cohort.</p>
+        <p class="details-note">Repeated out-of-fold estimates in the development cohort.</p>
       </div>
     </details>
 
@@ -679,15 +680,14 @@
     </details>
 
     <section class="source-block" aria-label="Model source">
-      <p>Developed from 458 adults hospitalized with asthma at Beijing Tongren Hospital, Capital Medical University.</p>
-      <p>Outcome: 18-segment mucus plug score ≥4.</p>
+      <p>Development cohort: 458 adults hospitalized with asthma · Beijing Tongren Hospital, Capital Medical University.</p>
     </section>
   </main>
 
   <footer class="page-footer">
-    <p>Research use only. The models have not undergone independent external validation and should not replace clinically indicated chest CT.</p>
+    <p>Research use only · No independent external validation · Do not replace clinically indicated chest CT.</p>
     <p class="privacy-line">No patient data are transmitted or stored.</p>
-    <p>Research model · Version 1.0 · August 2026<br>Beijing Tongren Hospital, Capital Medical University</p>
+    <p>Research model · Version 1.0 · August 2026</p>
   </footer>
 
   <script>
@@ -789,8 +789,9 @@
       const clinicalProbabilityElement = document.getElementById("clinical-probability");
       const mmefProbabilityElement = document.getElementById("mmef-probability");
       const mmefResultNote = document.getElementById("mmef-result-note");
-      const differenceElement = document.getElementById("probability-difference");
       const mmefWarning = document.getElementById("mmef-warning");
+      const calculationError = document.getElementById("calculation-error");
+      const calculateButton = document.getElementById("calculate-button");
 
       const fieldDefinitions = [
         { id: "ed-days", error: "ed-days-error", validate: validateEd },
@@ -877,12 +878,20 @@
         };
       }
 
+      function getModelEngine() {
+        const engine = globalThis.MucusPlugModel;
+        if (!engine || typeof engine.clinicalProbability !== "function" || typeof engine.mmefProbability !== "function") {
+          throw new Error("Model engine is not available");
+        }
+        return engine;
+      }
+
       function calculateClinicalProbability(values) {
-        return window.MucusPlugModel.clinicalProbability(values);
+        return getModelEngine().clinicalProbability(values);
       }
 
       function calculateMMEFProbability(values) {
-        return window.MucusPlugModel.mmefProbability(values);
+        return getModelEngine().mmefProbability(values);
       }
 
       function formatProbability(value) {
@@ -894,27 +903,24 @@
         clinicalProbabilityElement.textContent = formatProbability(clinical);
         if (values.mmef_percent_predicted === null) {
           mmefProbabilityElement.textContent = "—";
-          mmefResultNote.textContent = "Enter MMEF to calculate.";
-          differenceElement.textContent = "";
+          mmefResultNote.textContent = "Optional MMEF not entered.";
           return;
         }
         const withMMEF = calculateMMEFProbability(values);
-        const difference = (withMMEF - clinical) * 100;
         mmefProbabilityElement.textContent = formatProbability(withMMEF);
-        mmefResultNote.textContent = "Seven complete model inputs.";
-        differenceElement.textContent = `Difference after adding MMEF: ${difference >= 0 ? "+" : ""}${difference.toFixed(1)} percentage points`;
+        mmefResultNote.textContent = "With post-bronchodilator MMEF.";
       }
 
       function clearResults() {
         clinicalProbabilityElement.textContent = "—";
         mmefProbabilityElement.textContent = "—";
-        mmefResultNote.textContent = "Enter MMEF to calculate.";
-        differenceElement.textContent = "";
+        mmefResultNote.textContent = "Optional MMEF not entered.";
       }
 
       function resetCalculator() {
         summaryError.hidden = true;
         mmefWarning.hidden = true;
+        calculationError.hidden = true;
         for (const definition of fieldDefinitions) {
           setFieldState(definition, true);
         }
@@ -923,20 +929,38 @@
         clearResults();
       }
 
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
+      function runCalculation() {
+        calculationError.hidden = true;
         const validation = validateInputs();
         if (!validation.valid) {
+          clearResults();
           validation.firstInvalid.focus();
           return;
         }
-        displayResults(collectValues());
+        try {
+          displayResults(collectValues());
+        } catch (error) {
+          clearResults();
+          calculationError.hidden = false;
+          console.error(error);
+        }
+      }
+
+      calculateButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        runCalculation();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        runCalculation();
       });
 
       form.addEventListener("reset", () => {
         clearResults();
         summaryError.hidden = true;
         mmefWarning.hidden = true;
+        calculationError.hidden = true;
         window.setTimeout(resetCalculator, 0);
       });
 
