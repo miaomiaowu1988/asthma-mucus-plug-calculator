@@ -14,6 +14,6 @@ The live page was tested in Google Chrome and Microsoft Edge. Five fixed cases w
 | Mixed case A | 94.5% | 97.0% |
 | Mixed case B | 42.3% | 24.4% |
 
-All 10 browser-case comparisons matched the Python gold standard exactly at one decimal percent.
+All 10 browser-case comparisons matched the Python gold standard exactly at one decimal percent. The same checks were repeated after the compact UI revision and remained unchanged.
 
 Final result: `PASS_ONLINE_FIXED_CASE_QA`.
