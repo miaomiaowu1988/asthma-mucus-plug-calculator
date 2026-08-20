@@ -19,6 +19,10 @@ Open the [calculator](https://miaomiaowu1988.github.io/asthma-mucus-plug-calcula
 
 Probabilities are displayed continuously. No risk categories or clinical decision thresholds have been defined.
 
+## Local preview
+
+Open `docs/index.html` for a working local preview. `source/index.template.html` is a build template and should not be opened as the calculator page.
+
 ## Model formulas
 
 ```text
