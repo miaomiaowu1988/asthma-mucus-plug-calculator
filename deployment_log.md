@@ -8,7 +8,7 @@ Deployed August 20, 2026.
 - Visibility: public
 - Default branch: `main`
 - GitHub Pages source: `main` branch, `/docs` folder
-- Compact UI content commit: `cf82353a6bc8ea330097391663834c7b13d6d9e6`
+- MMEF validation fix commit: `f393a307c2e1129627dde61dae891d5e3f9ecd76`
 - Published repository files: 21
 
 Repository URL:
@@ -22,9 +22,9 @@ Calculator URL:
 ## Publication verification
 
 - HTTP status: 200
-- Published page size: 28,669 bytes
-- Local page SHA-256: `9FAB9C2D4EC77720A7772591EFAC692BE7A8D12A7C0FA81243E034D549FBB574`
-- Online page SHA-256: `9FAB9C2D4EC77720A7772591EFAC692BE7A8D12A7C0FA81243E034D549FBB574`
+- Published page size: 28,915 bytes
+- Local page SHA-256: `C4073C9EA23124720C5BE55A16A813F8F44C5A56E3526D54A78807FA18139CB5`
+- Online page SHA-256: `C4073C9EA23124720C5BE55A16A813F8F44C5A56E3526D54A78807FA18139CB5`
 - Local/online match: yes
 
 The public repository contains calculator source, frozen model specifications, tests, and documentation. No patient-level data or internal project-history files were uploaded.
