@@ -1,0 +1,39 @@
+{
+  "model_name": "High Mucus Plug Burden Calculator",
+  "model_version": "1.0",
+  "frozen_date": "2026-08-20",
+  "population": "Adults hospitalized with asthma",
+  "outcome": "18-segment mucus plug score >=4",
+  "clinical": {
+    "intercept": -2.960,
+    "ed_log1p": 1.161,
+    "nasal_polyps": 1.132,
+    "gina_step": 0.315,
+    "female": -0.565,
+    "breathing_pattern_disorder": 0.624,
+    "current_smoking": 0.836
+  },
+  "clinical_mmef": {
+    "intercept": -0.411,
+    "ed_log1p": 1.292,
+    "nasal_polyps": 1.256,
+    "gina_step": 0.175,
+    "female": -0.764,
+    "breathing_pattern_disorder": 0.441,
+    "current_smoking": 0.681,
+    "mmef_per_10_percent_predicted": -0.401
+  },
+  "performance": {
+    "clinical": {"auroc": 0.770, "pr_auc": 0.496, "brier": 0.144},
+    "clinical_mmef": {"auroc": 0.832, "pr_auc": 0.598, "brier": 0.126}
+  },
+  "encoding": {
+    "ed_patient_days": "integer 0-365, transformed with ln(1+x)",
+    "nasal_polyps": "No=0, Yes=1",
+    "gina_step": "integer 1-5",
+    "female": "Male=0, Female=1",
+    "breathing_pattern_disorder": "No=0, Yes=1",
+    "current_smoking": "Current=1; Never, Former, and Indeterminate=0",
+    "mmef_percent_predicted": "nonnegative continuous value; coefficient applies per 10 percentage points"
+  }
+}
