@@ -50,10 +50,17 @@ async function exerciseCalculator(page) {
   expect((await page.locator("#mmef-probability").textContent()).trim() === "—", "MMEF result should be unavailable");
   expect((await page.locator("#mmef-result-note").textContent()).includes("Optional MMEF not entered"), "Missing-MMEF instruction absent");
 
-  await page.locator("#mmef").fill("60");
+  await page.locator("#mmef").fill("0");
+  await page.locator("#calculate-button").click();
+  expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical result should remain available when MMEF is invalid");
+  expect((await page.locator("#mmef-probability").textContent()).trim() === "—", "MMEF=0 must not be calculated");
+  expect(await page.locator("#mmef-error").isVisible(), "MMEF=0 validation error absent");
+  expect((await page.locator("#mmef-result-note").textContent()).includes("greater than 0"), "Invalid-MMEF result instruction absent");
+
+  await page.locator("#mmef").fill("30");
   await page.locator("#calculate-button").click();
   expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical result changed after MMEF entry");
-  expect((await page.locator("#mmef-probability").textContent()).trim() === "6.6%", "MMEF display mismatch");
+  expect((await page.locator("#mmef-probability").textContent()).trim() === "19.2%", "MMEF display mismatch");
   expect((await page.locator("#mmef-result-note").textContent()).includes("With post-bronchodilator MMEF"), "MMEF result note mismatch");
 
   await page.locator("#mmef").fill("201");

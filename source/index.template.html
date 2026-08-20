@@ -612,9 +612,9 @@
 
             <div class="field-group full-width">
               <label for="mmef">Post-bronchodilator MMEF, % predicted</label>
-              <input id="mmef" class="compact-number" name="mmef_percent_predicted" type="number" min="0" step="0.1" inputmode="decimal" autocomplete="off">
+              <input id="mmef" class="compact-number" name="mmef_percent_predicted" type="number" min="0.1" step="0.1" inputmode="decimal" autocomplete="off">
               <p class="field-note">Optional · GLI-2012.</p>
-              <p id="mmef-error" class="field-error" hidden>Enter a nonnegative number or leave the field blank.</p>
+              <p id="mmef-error" class="field-error" hidden>Enter a number greater than 0 or leave the field blank.</p>
               <p id="mmef-warning" class="field-warning" hidden>Please verify this value; it is above 200% predicted.</p>
             </div>
           </div>
@@ -751,7 +751,7 @@
         const input = document.getElementById("mmef");
         const error = document.getElementById("mmef-error");
         const raw = input.value.trim();
-        const valid = raw === "" || (Number.isFinite(Number(raw)) && Number(raw) >= 0);
+        const valid = raw === "" || (Number.isFinite(Number(raw)) && Number(raw) > 0);
         input.setAttribute("aria-invalid", String(!valid));
         error.hidden = valid;
         mmefWarning.hidden = !(valid && raw !== "" && Number(raw) > 200);
@@ -770,11 +770,8 @@
           }
         }
         const mmefValid = validateMMEF();
-        if (!mmefValid && !firstInvalid) {
-          firstInvalid = document.getElementById("mmef");
-        }
         summaryError.hidden = firstInvalid === null;
-        return { valid: firstInvalid === null, firstInvalid };
+        return { valid: firstInvalid === null, mmefValid, firstInvalid };
       }
 
       function collectValues() {
@@ -811,12 +808,17 @@
         return `${(value * 100).toFixed(1)}%`;
       }
 
-      function displayResults(values) {
+      function displayResults(values, mmefValid) {
         const clinical = calculateClinicalProbability(values);
         clinicalProbabilityElement.textContent = formatProbability(clinical);
         if (values.mmef_percent_predicted === null) {
           mmefProbabilityElement.textContent = "—";
           mmefResultNote.textContent = "Optional MMEF not entered.";
+          return;
+        }
+        if (!mmefValid) {
+          mmefProbabilityElement.textContent = "—";
+          mmefResultNote.textContent = "Enter MMEF greater than 0 to calculate this model.";
           return;
         }
         const withMMEF = calculateMMEFProbability(values);
@@ -851,7 +853,10 @@
           return;
         }
         try {
-          displayResults(collectValues());
+          displayResults(collectValues(), validation.mmefValid);
+          if (!validation.mmefValid) {
+            document.getElementById("mmef").focus();
+          }
         } catch (error) {
           clearResults();
           calculationError.hidden = false;

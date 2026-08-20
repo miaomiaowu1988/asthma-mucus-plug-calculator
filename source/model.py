@@ -103,8 +103,8 @@ def mmef_linear_predictor(
         breathing_pattern_disorder,
         current_smoking,
     )
-    if not isinstance(mmef_percent_predicted, (int, float)) or not math.isfinite(mmef_percent_predicted) or mmef_percent_predicted < 0:
-        raise ValueError("mmef_percent_predicted must be a finite nonnegative number")
+    if not isinstance(mmef_percent_predicted, (int, float)) or not math.isfinite(mmef_percent_predicted) or mmef_percent_predicted <= 0:
+        raise ValueError("mmef_percent_predicted must be a finite number greater than 0")
     return (
         -0.411
         + 1.292 * math.log1p(ed_patient_days)

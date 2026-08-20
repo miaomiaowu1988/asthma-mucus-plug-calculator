@@ -58,8 +58,8 @@
 
   function mmefLinearPredictor(values) {
     validateClinicalInputs(values);
-    if (!Number.isFinite(values.mmef_percent_predicted) || values.mmef_percent_predicted < 0) {
-      throw new RangeError("mmef_percent_predicted must be a finite nonnegative number");
+    if (!Number.isFinite(values.mmef_percent_predicted) || values.mmef_percent_predicted <= 0) {
+      throw new RangeError("mmef_percent_predicted must be a finite number greater than 0");
     }
     return (
       -0.411

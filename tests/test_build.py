@@ -48,3 +48,8 @@ def test_page_uses_frozen_wording_and_no_risk_categories() -> None:
         assert text in html
     for text in forbidden:
         assert text not in html
+
+    assert 'id="mmef"' in html
+    assert 'min="0.1"' in html
+    assert "Enter a number greater than 0 or leave the field blank." in html
+    assert "Enter MMEF greater than 0 to calculate this model." in html

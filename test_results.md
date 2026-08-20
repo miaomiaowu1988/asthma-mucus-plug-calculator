@@ -4,7 +4,7 @@ Tested August 20, 2026.
 
 ## Model tests
 
-- Python unit tests: 32 passed
+- Python unit tests: 33 passed
 - Frozen coefficient check: passed
 - ED `ln(1+x)` transformation: passed
 - MMEF 30 to 40 linear-predictor change: -0.401, passed
@@ -41,6 +41,9 @@ Online GitHub Pages verification is recorded separately in `online_QA.md` after 
 
 - Calculate button: explicit click handler plus form-submit fallback
 - Runtime initialization failure: visible error message instead of silent no-result behavior
+- Blank MMEF: clinical model remains available and the MMEF model is not calculated
+- MMEF equal to 0: rejected without substitution or extended-model calculation
+- MMEF greater than 200% predicted: non-blocking verification warning
 - Google Chrome and Microsoft Edge functional tests: passed
 - Clinical-only fixed case: 6.6%, passed
 - Clinical + MMEF fixed case: 6.6%, passed

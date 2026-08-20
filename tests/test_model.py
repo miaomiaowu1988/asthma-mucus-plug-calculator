@@ -101,7 +101,7 @@ def test_mmef_30_to_40_changes_linear_predictor_by_minus_0_401():
     assert lp_40 - lp_30 == pytest.approx(-0.401, abs=1e-14)
 
 
-@pytest.mark.parametrize("mmef", [0, 30, 60, 100, 150])
+@pytest.mark.parametrize("mmef", [0.1, 30, 60, 100, 150])
 def test_mmef_values_use_per_10_percentage_point_scaling(mmef):
     kwargs = clinical_kwargs()
     observed = mmef_linear_predictor(**kwargs, mmef_percent_predicted=mmef)
@@ -140,7 +140,7 @@ def test_invalid_clinical_input_is_rejected(field, value):
         clinical_probability(**clinical_kwargs(**{field: value}))
 
 
-@pytest.mark.parametrize("value", [-1, float("nan"), float("inf")])
+@pytest.mark.parametrize("value", [0, -1, float("nan"), float("inf")])
 def test_invalid_mmef_is_rejected(value):
     with pytest.raises(ValueError):
         mmef_probability(**clinical_kwargs(), mmef_percent_predicted=value)
