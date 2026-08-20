@@ -36,3 +36,16 @@ Tested August 20, 2026.
 - External fonts/CDNs: 0
 
 Online GitHub Pages verification is recorded separately in `online_QA.md` after deployment.
+
+## UI revision QA
+
+- Calculate button: explicit click handler plus form-submit fallback
+- Runtime initialization failure: visible error message instead of silent no-result behavior
+- Google Chrome and Microsoft Edge functional tests: passed
+- Clinical-only fixed case: 6.6%, passed
+- Clinical + MMEF fixed case: 6.6%, passed
+- ED input rendered width: 170 px
+- MMEF input rendered width: 170 px
+- Python-JavaScript parity: 5,000 random cases, passed
+- Maximum absolute Python-JavaScript difference: 3.552713678800501e-15
+- Privacy scan: passed
