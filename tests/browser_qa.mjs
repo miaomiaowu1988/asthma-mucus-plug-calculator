@@ -36,6 +36,9 @@ async function probabilities() {
 }
 try {
   await page.goto(url,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('h1').textContent(),'Mucus Plug Burden Research Calculator');
+  assert.equal(await page.locator('#about-model').count(),1);
+  assert.equal(await page.locator('footer p').count(),2);
   assert.equal(await page.locator('#mmef').inputValue(),'');
   await click(); assert.ok(await page.locator('#form-summary-error').isVisible()); edges.push('All missing inputs rejected');
   for(const x of cases) {
@@ -58,12 +61,21 @@ try {
   }
   await fill({...cases[0],ed_patient_days:1000,mmef_percent_predicted:201});await click();assert.ok((await probabilities())[1].raw!==null);edges.push('Large valid inputs not clipped');
   await page.locator('#reset-button').click();assert.equal((await probabilities())[0].raw,null);assert.equal(await page.locator('#heart-rate').inputValue(),'');edges.push('Reset clears inputs/results');
+  await fill(cases[3]);await click();assert.ok((await probabilities())[0].raw!==null);edges.push('Recalculate after Reset');
+  await page.reload({waitUntil:'networkidle'});assert.equal((await probabilities())[0].raw,null);assert.equal(await page.locator('#mmef').inputValue(),'');
+  await fill(cases[5]);await click();assert.ok(Math.abs((await probabilities())[0].raw-cases[5].python_clinical_probability)<1e-10);edges.push('Refresh clears stale results and calculation still works');
+  await page.goto('about:blank');await page.goto(url,{waitUntil:'networkidle'});assert.equal((await probabilities())[0].raw,null);
+  await fill(cases[8]);await click();assert.ok(Math.abs((await probabilities())[1].raw-cases[8].python_clinical_mmef_probability)<1e-10);edges.push('Reopen page and calculate');
   const layouts=[];
   for(const viewport of [{width:1366,height:900},{width:390,height:844},{width:320,height:740}]) {
     await page.setViewportSize(viewport);await fill(cases[7]);await click();
     const layout=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,ed:document.getElementById('ed-days').getBoundingClientRect().width}));
     assert.ok(layout.scroll<=layout.width);assert.equal(layout.ed,170);layouts.push(layout);
     await page.screenshot({path:path.join(out,`viewport-${viewport.width}.png`),fullPage:true});
+    await page.locator('#about-model summary').click();
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+    await page.screenshot({path:path.join(out,`about-${viewport.width}.png`),fullPage:true});
+    await page.locator('#about-model summary').click();
   }
   assert.equal(await page.locator('#calculation-error').isVisible(),false);
   assert.equal(await page.locator('a[href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator"]').count(),1);

@@ -15,6 +15,8 @@ Developed and internally evaluated in a single-center retrospective cohort (458 
 
 ## Reproducibility
 
+Internal evaluation (Clinical / Clinical + MMEF): AUROC 0.770 / 0.833; PR-AUC 0.496 / 0.599; Brier 0.144 / 0.126, from the frozen Table 3. These are internal estimates, not external-validation results. The page places performance and full equations in a collapsed About section. No clinical action thresholds are provided.
+
 `model_parameters_final.json` is the sole numeric parameter source. All coefficients are original-scale full precision: heart rate per 1 bpm, MMEF per 1 percentage point. The build embeds the JSON and source scripts into identical root and `docs/index.html` files; no network fetch is needed for calculation. Equation display is generated from the same parameters.
 
 ```text

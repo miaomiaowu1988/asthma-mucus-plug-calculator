@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="light">
   <link rel="icon" href="data:,">
   <meta name="description" content="Research calculator for concurrent high mucus plug burden in adults hospitalized with asthma.">
-  <title>High Mucus Plug Burden Calculator</title>
+  <title>Mucus Plug Burden Research Calculator</title>
   <style>
     :root {
       color-scheme: light;
@@ -532,9 +532,8 @@
 <body>
   <header class="page-header">
     <div class="header-inner">
-      <p class="version-line">Research model · Heart-rate final</p>
-      <h1>Research Calculator for CT-Defined High Mucus Plug Burden in Adults Hospitalized With Asthma</h1>
-      <p class="subtitle">Estimate the concurrent probability of high mucus plug burden using the internally evaluated clinical models.</p>
+      <h1>Mucus Plug Burden Research Calculator</h1>
+      <p class="subtitle">Estimate the concurrent probability of CT-defined high mucus plug burden in adults hospitalized with asthma.</p>
     </div>
   </header>
 
@@ -634,40 +633,48 @@
           <div class="result-item">
             <span class="result-label">Clinical model</span>
             <strong id="clinical-probability" class="probability">—</strong>
-
+            <p class="result-note">Based on routinely recorded clinical information.</p>
           </div>
           <div class="result-item">
-            <span class="result-label">Clinical model with MMEF</span>
+            <span class="result-label">Clinical + MMEF model</span>
             <strong id="mmef-probability" class="probability">—</strong>
             <p id="mmef-result-note" class="result-note">Enter post-bronchodilator MMEF to calculate this model.</p>
           </div>
         </div>
 
-        <p class="concurrent-note">High mucus plug burden was defined as an 18-segment mucus plug score ≥4.</p>
+        <p class="concurrent-note">High mucus plug burden: 18-segment mucus plug score ≥4 on chest CT.</p>
       </section>
     </div>
 
-    <details id="model-equations" class="information">
-      <summary>Model equations</summary>
+    <details id="about-model" class="information">
+      <summary>About the model</summary>
       <div class="details-content">
+        <p>The models were developed and internally evaluated in a retrospective cohort of 458 adults hospitalized with asthma at Beijing Tongren Hospital.</p>
+        <h3>Internal evaluation</h3>
+        <table class="model-table">
+          <thead><tr><th>Metric</th><th>Clinical</th><th>Clinical + MMEF</th></tr></thead>
+          <tbody>
+            <tr><td>AUROC</td><td>0.770</td><td>0.833</td></tr>
+            <tr><td>PR-AUC</td><td>0.496</td><td>0.599</td></tr>
+            <tr><td>Brier score</td><td>0.144</td><td>0.126</td></tr>
+          </tbody>
+        </table>
+        <p class="details-note">Addition of MMEF improved internal model performance, but supporting analyses did not establish superiority over FEV₁/FVC or FEV₁ % predicted.</p>
+        <h3>Model equations</h3>
         <div id="equations-content"></div>
         <p class="details-note">Probability = 1 / (1 + exp(-LP)). ED uses ln(1 + patient-days). Female and current smoking are coded as 1; male and other smoking categories as 0. Heart rate and MMEF use raw units.</p>
       </div>
     </details>
 
-    <section class="source-block" aria-label="Model source">
-      <p>Development cohort: 458 adults hospitalized with asthma · Beijing Tongren Hospital, Capital Medical University.</p>
-    </section>
   </main>
 
   <footer class="page-footer">
-    <p><strong>Research use only.</strong> These models were developed and internally evaluated in a single-center retrospective cohort of adults hospitalized with asthma. They have not undergone independent external validation. Estimated probabilities should not be used as a substitute for clinically indicated CT or as a stand-alone basis for treatment decisions.</p>
-    <p class="privacy-line">No patient data are transmitted or stored.</p>
-    <p>Research model · 20 September 2026 · <a href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator">Source code</a></p>
+    <p><strong>For research use only.</strong> The models have not been independently externally validated and should not replace clinically indicated CT or serve as the sole basis for treatment decisions.</p>
+    <p class="privacy-line">No patient data are transmitted or stored. · <a href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator">Source code</a></p>
   </footer>
 
   <script>
-globalThis.ModelParameters = {"version": "2026-09-20-heart-rate-final", "outcome": "18-segment mucus plug score >=4", "models": {"Clinical": {"C": 0.1, "intercept": -4.851254414228107, "coefficients": {"pre365_ed_log1p": 1.1869088662062584, "nasal_polyps": 1.2260884444816122, "gina_step": 0.38161912249719837, "sex_female": -0.4946553308906247, "Heart_rate_bpm": 0.022067043874158056, "smoking_current": 0.84270813109277}}, "Clinical + MMEF": {"C": 0.5, "intercept": -1.8358448457085832, "coefficients": {"pre365_ed_log1p": 1.2829024882145437, "nasal_polyps": 1.2986750056903116, "gina_step": 0.235216875766777, "sex_female": -0.7120082216377637, "Heart_rate_bpm": 0.01624235625211623, "smoking_current": 0.6701718544862105, "mmef_percent_pred": -0.04017548872903433}}}};
+globalThis.ModelParameters = {"version": "2026-09-20-heart-rate-final", "model_version": "2026-09-20-heart-rate-final", "parameter_source": "Asthma_HeartRate_Final_Consistency_20260920.zip / tables/Full_precision_equations.json; PASS_FIXED_HEART_RATE_INTERNAL_CONSISTENCY", "outcome": "18-segment mucus plug score >=4", "models": {"Clinical": {"C": 0.1, "intercept": -4.851254414228107, "coefficients": {"pre365_ed_log1p": 1.1869088662062584, "nasal_polyps": 1.2260884444816122, "gina_step": 0.38161912249719837, "sex_female": -0.4946553308906247, "Heart_rate_bpm": 0.022067043874158056, "smoking_current": 0.84270813109277}}, "Clinical + MMEF": {"C": 0.5, "intercept": -1.8358448457085832, "coefficients": {"pre365_ed_log1p": 1.2829024882145437, "nasal_polyps": 1.2986750056903116, "gina_step": 0.235216875766777, "sex_female": -0.7120082216377637, "Heart_rate_bpm": 0.01624235625211623, "smoking_current": 0.6701718544862105, "mmef_percent_pred": -0.04017548872903433}}}};
 (function (root) {
   'use strict';
   const parameters = typeof module !== 'undefined' && module.exports
@@ -742,7 +749,7 @@ globalThis.ModelParameters = {"version": "2026-09-20-heart-rate-final", "outcome
     try {
       show(clinical,globalThis.MucusPlugModel.clinicalProbability(x));
       if (mmefValid && x.mmef_percent_predicted!==null) {
-        show(extended,globalThis.MucusPlugModel.mmefProbability(x)); $('mmef-result-note').textContent='With post-bronchodilator MMEF.';
+        show(extended,globalThis.MucusPlugModel.mmefProbability(x)); $('mmef-result-note').textContent='Includes post-bronchodilator MMEF.';
       } else if (!mmefValid) $('mmef-result-note').textContent='Enter a valid nonnegative MMEF value.';
     } catch (_) { clearResults(); $('calculation-error').hidden=false; }
   }

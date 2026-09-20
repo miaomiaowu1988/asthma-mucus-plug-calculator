@@ -1,5 +1,7 @@
 {
   "version": "2026-09-20-heart-rate-final",
+  "model_version": "2026-09-20-heart-rate-final",
+  "parameter_source": "Asthma_HeartRate_Final_Consistency_20260920.zip / tables/Full_precision_equations.json; PASS_FIXED_HEART_RATE_INTERNAL_CONSISTENCY",
   "outcome": "18-segment mucus plug score >=4",
   "models": {
     "Clinical": {

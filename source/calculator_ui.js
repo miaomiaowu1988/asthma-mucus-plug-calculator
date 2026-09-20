@@ -36,7 +36,7 @@
     try {
       show(clinical,globalThis.MucusPlugModel.clinicalProbability(x));
       if (mmefValid && x.mmef_percent_predicted!==null) {
-        show(extended,globalThis.MucusPlugModel.mmefProbability(x)); $('mmef-result-note').textContent='With post-bronchodilator MMEF.';
+        show(extended,globalThis.MucusPlugModel.mmefProbability(x)); $('mmef-result-note').textContent='Includes post-bronchodilator MMEF.';
       } else if (!mmefValid) $('mmef-result-note').textContent='Enter a valid nonnegative MMEF value.';
     } catch (_) { clearResults(); $('calculation-error').hidden=false; }
   }
