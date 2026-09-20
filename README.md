@@ -1,57 +1,35 @@
-# High Mucus Plug Burden Calculator
+# High Mucus Plug Burden Research Calculator
 
-Research calculator for adults hospitalized with asthma.
+Estimates concurrent probability of an **18-segment mucus plug score >=4** in adults hospitalized with asthma. This is not a future-risk model.
 
-## Models
+Developed and internally evaluated in a single-center retrospective cohort (458 records). No independent external validation. Research use only; probabilities must not replace clinically indicated CT or determine treatment. No manuscript DOI is asserted.
 
-- Clinical model
-- Clinical model with post-bronchodilator MMEF
+## Models and inputs
 
-## Outcome
+- Clinical: prior 365-day asthma-related ED patient-days, history of nasal polyps, recorded GINA treatment step, sex, heart rate, and current smoking.
+- Clinical + MMEF: the same six variables plus post-bronchodilator MMEF, % predicted.
+- ED is entered as a raw nonnegative integer and transformed with `log1p` internally.
+- Female=1, male=0. Current smoking=1, all other categories=0 (including never, former, and indeterminate in development data).
+- GINA uses recorded ordinal values 0-5. Category 0 is a dataset code, not a proposed guideline treatment step.
+- Heart rate is positive bpm. MMEF is nonnegative % predicted. Blank MMEF is missing, not zero; only the clinical model is calculated. Other inputs are required. No user-input imputation, clipping, or clinical threshold is implemented.
 
-Concurrent high mucus plug burden, defined as an 18-segment mucus plug score >=4.
+## Reproducibility
 
-All calculations run locally in the browser. The page sends no patient data, uses no analytics, and stores no entries.
-
-## Use
-
-Open the [calculator](https://miaomiaowu1988.github.io/asthma-mucus-plug-calculator/) and enter all six required clinical variables. Post-bronchodilator MMEF is optional; when entered, the second model is also calculated.
-
-Probabilities are displayed continuously. No risk categories or clinical decision thresholds have been defined.
-
-## Local preview
-
-Open `docs/index.html` for a working local preview. `source/index.template.html` is a build template and should not be opened as the calculator page.
-
-## Model formulas
+`model_parameters_final.json` is the sole numeric parameter source. All coefficients are original-scale full precision: heart rate per 1 bpm, MMEF per 1 percentage point. The build embeds the JSON and source scripts into identical root and `docs/index.html` files; no network fetch is needed for calculation. Equation display is generated from the same parameters.
 
 ```text
-Clinical LP = -2.960
-  + 1.161 * ln(1 + ED patient-days)
-  + 1.132 * NasalPolyps
-  + 0.315 * GINA
-  - 0.565 * Female
-  + 0.624 * BPD
-  + 0.836 * CurrentSmoking
-
-Clinical + MMEF LP = -0.411
-  + 1.292 * ln(1 + ED patient-days)
-  + 1.256 * NasalPolyps
-  + 0.175 * GINA
-  - 0.764 * Female
-  + 0.441 * BPD
-  + 0.681 * CurrentSmoking
-  - 0.401 * (MMEF % predicted / 10)
-
-Probability = 1 / (1 + exp(-LP))
+python source/build_site.py
+python tests/generate_cases.py
+node tests/test_heart_rate.js
+node tests/browser_qa.mjs
 ```
 
-Current smoking is coded 1. Never, former, and indeterminate smoking status are coded 0.
+Browser tests require Playwright and Chrome. Set NODE_PATH if using an external package runtime. The Python reference reads the same canonical JSON independently. Browser QA fills the real form, clicks Calculate, and compares unrounded DOM probability data against 20 Python reference cases (tolerance <1e-10). Reports and screenshots go to ignored `test_artifacts/`.
 
-## Validation status
+Open `index.html` or `docs/index.html`, not the source template. GitHub Pages serves the configured publication directory.
 
-Performance was estimated using repeated out-of-fold evaluation in the development cohort. The models have not undergone independent external validation.
+## Privacy
 
-Research use only. The calculator should not replace clinically indicated chest CT.
+All calculations run locally in the browser. No API calls, analytics, cookies, browser storage, or patient-data transmission. Tests contain only synthetic inputs. Public parameters contain no patient records.
 
-Version 1.0, August 2026.
+[Calculator](https://miaomiaowu1988.github.io/asthma-mucus-plug-calculator/) | [Source](https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator)

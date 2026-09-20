@@ -1,0 +1,10 @@
+const assert = require('node:assert/strict');
+const model = require('../source/model_engine.js');
+const x = {ed_patient_days:0,nasal_polyps:0,gina_step:0,female:0,heart_rate_bpm:70,current_smoking:0,mmef_percent_predicted:0};
+assert.ok(Number.isFinite(model.clinicalProbability(x)), 'Heart-rate model must support recorded GINA 0');
+assert.ok(Number.isFinite(model.mmefProbability(x)), 'Explicit MMEF zero is distinct from missing');
+assert.ok(model.clinicalProbability({...x,heart_rate_bpm:100}) > model.clinicalProbability(x));
+for (const bad of [null,'',NaN,Infinity,0,-1]) assert.throws(()=>model.clinicalProbability({...x,heart_rate_bpm:bad}));
+for (const bad of [null,'',NaN,Infinity,-1]) assert.throws(()=>model.mmefProbability({...x,mmef_percent_predicted:bad}));
+for (const bad of [-1,1.5,NaN,Infinity]) assert.throws(()=>model.clinicalProbability({...x,ed_patient_days:bad}));
+console.log('Heart-rate contracts PASS');

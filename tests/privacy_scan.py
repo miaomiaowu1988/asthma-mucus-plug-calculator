@@ -21,7 +21,6 @@ FORBIDDEN_PATTERNS = {
     "session_storage": r"\bsessionStorage\b",
     "cookies": r"document\.cookie",
     "analytics": r"google-analytics|googletagmanager|gtag\s*\(|plausible\.io|matomo",
-    "external_url": r"https?://",
     "external_script": r"<script[^>]+src\s*=",
     "external_stylesheet": r"<link[^>]+href\s*=",
     "external_form": r"<form[^>]+action\s*=",
@@ -41,7 +40,7 @@ def scan(html_path: Path) -> dict[str, object]:
         "external_api_calls": 0 if "fetch" not in findings and "xml_http_request" not in findings else None,
         "analytics": 0 if "analytics" not in findings else None,
         "patient_storage": 0 if not {"local_storage", "session_storage", "cookies"}.intersection(findings) else None,
-        "hidden_tracking": 0 if not {"analytics", "beacon", "external_url"}.intersection(findings) else None,
+        "hidden_tracking": 0 if not {"analytics", "beacon"}.intersection(findings) else None,
         "findings": findings,
         "pass": not findings,
     }

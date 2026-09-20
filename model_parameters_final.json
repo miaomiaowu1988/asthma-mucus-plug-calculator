@@ -1,0 +1,31 @@
+{
+  "version": "2026-09-20-heart-rate-final",
+  "outcome": "18-segment mucus plug score >=4",
+  "models": {
+    "Clinical": {
+      "C": 0.1,
+      "intercept": -4.851254414228107,
+      "coefficients": {
+        "pre365_ed_log1p": 1.1869088662062584,
+        "nasal_polyps": 1.2260884444816122,
+        "gina_step": 0.38161912249719837,
+        "sex_female": -0.4946553308906247,
+        "Heart_rate_bpm": 0.022067043874158056,
+        "smoking_current": 0.84270813109277
+      }
+    },
+    "Clinical + MMEF": {
+      "C": 0.5,
+      "intercept": -1.8358448457085832,
+      "coefficients": {
+        "pre365_ed_log1p": 1.2829024882145437,
+        "nasal_polyps": 1.2986750056903116,
+        "gina_step": 0.235216875766777,
+        "sex_female": -0.7120082216377637,
+        "Heart_rate_bpm": 0.01624235625211623,
+        "smoking_current": 0.6701718544862105,
+        "mmef_percent_pred": -0.04017548872903433
+      }
+    }
+  }
+}

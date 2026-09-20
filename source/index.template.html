@@ -531,9 +531,9 @@
 <body>
   <header class="page-header">
     <div class="header-inner">
-      <p class="version-line">Research model · Version 1.0</p>
-      <h1>High Mucus Plug Burden Calculator</h1>
-      <p class="subtitle">Hospitalized adults with asthma</p>
+      <p class="version-line">Research model · Heart-rate final</p>
+      <h1>Research Calculator for CT-Defined High Mucus Plug Burden in Adults Hospitalized With Asthma</h1>
+      <p class="subtitle">Estimate the concurrent probability of high mucus plug burden using the internally evaluated clinical models.</p>
     </div>
   </header>
 
@@ -553,9 +553,9 @@
           <div class="form-grid">
             <div class="field-group full-width">
               <label for="ed-days">Asthma-related ED patient-days in the preceding 365 days <span class="required-mark">*</span></label>
-              <input id="ed-days" class="compact-number" name="ed_patient_days" type="number" min="0" max="365" step="1" inputmode="numeric" autocomplete="off">
+              <input id="ed-days" class="compact-number" name="ed_patient_days" type="number" min="0" step="1" inputmode="numeric" autocomplete="off">
               <p class="field-note">Days with ≥1 asthma-related ED encounter.</p>
-              <p id="ed-days-error" class="field-error" hidden>Enter an integer from 0 to 365.</p>
+              <p id="ed-days-error" class="field-error" hidden>Enter a nonnegative integer.</p>
             </div>
 
             <fieldset id="nasal-polyps-group" class="field-group">
@@ -568,16 +568,17 @@
             </fieldset>
 
             <div class="field-group">
-              <label for="gina-step">GINA 2026 treatment step <span class="required-mark">*</span></label>
+              <label for="gina-step">GINA treatment step <span class="required-mark">*</span></label>
               <select id="gina-step" name="gina_step">
                 <option value="" selected>Select</option>
+                <option value="0">0 (recorded category)</option>
                 <option value="1">Step 1</option>
                 <option value="2">Step 2</option>
                 <option value="3">Step 3</option>
                 <option value="4">Step 4</option>
                 <option value="5">Step 5</option>
               </select>
-              <p id="gina-step-error" class="field-error" hidden>Select Step 1 through Step 5.</p>
+              <p id="gina-step-error" class="field-error" hidden>Select a recorded value from 0 to 5.</p>
             </div>
 
             <fieldset id="sex-group" class="field-group">
@@ -589,33 +590,27 @@
               <p id="sex-error" class="field-error" hidden>Select Male or Female.</p>
             </fieldset>
 
-            <fieldset id="bpd-group" class="field-group">
-              <legend>Clinician-diagnosed breathing pattern disorder <span class="required-mark">*</span></legend>
-              <div class="segmented">
-                <label><input type="radio" name="breathing_pattern_disorder" value="0"><span>No</span></label>
-                <label><input type="radio" name="breathing_pattern_disorder" value="1"><span>Yes</span></label>
-              </div>
-              <p id="bpd-error" class="field-error" hidden>Select No or Yes.</p>
-            </fieldset>
+            <div class="field-group">
+              <label for="heart-rate">Heart rate, beats/min <span class="required-mark">*</span></label>
+              <input id="heart-rate" class="compact-number" name="heart_rate_bpm" type="number" step="any" inputmode="decimal" autocomplete="off">
+              <p id="heart-rate-error" class="field-error" hidden>Enter a number greater than 0.</p>
+            </div>
 
             <div class="field-group">
-              <label for="smoking-status">Smoking status <span class="required-mark">*</span></label>
+              <label for="smoking-status">Current smoking <span class="required-mark">*</span></label>
               <select id="smoking-status" name="smoking_status">
                 <option value="" selected>Select</option>
-                <option value="never">Never</option>
-                <option value="former">Former</option>
-                <option value="current">Current</option>
-                <option value="indeterminate">Indeterminate</option>
+                <option value="0">No</option>
+                <option value="1">Yes</option>
               </select>
-              <p id="smoking-status-error" class="field-error" hidden>Select a smoking-status category.</p>
+              <p id="smoking-status-error" class="field-error" hidden>Select No or Yes.</p>
             </div>
 
             <div class="field-group full-width">
               <label for="mmef">Post-bronchodilator MMEF, % predicted</label>
-              <input id="mmef" class="compact-number" name="mmef_percent_predicted" type="number" min="0.1" step="0.1" inputmode="decimal" autocomplete="off">
-              <p class="field-note">Optional · GLI-2012.</p>
-              <p id="mmef-error" class="field-error" hidden>Enter a number greater than 0 or leave the field blank.</p>
-              <p id="mmef-warning" class="field-warning" hidden>Please verify this value; it is above 200% predicted.</p>
+              <input id="mmef" class="compact-number" name="mmef_percent_predicted" type="number" min="0" step="any" inputmode="decimal" autocomplete="off">
+              <p class="field-note">Optional.</p>
+              <p id="mmef-error" class="field-error" hidden>Enter a nonnegative number or leave the field blank.</p>
             </div>
           </div>
 
@@ -631,7 +626,7 @@
 
       <section class="calculator-section results-section" aria-labelledby="results-heading">
         <div class="section-heading">
-          <h2 id="results-heading">Estimated probability of high mucus plug burden</h2>
+          <h2 id="results-heading">Estimated concurrent probability of high mucus plug burden</h2>
         </div>
 
         <div class="result-grid" aria-live="polite">
@@ -643,39 +638,19 @@
           <div class="result-item">
             <span class="result-label">Clinical model with MMEF</span>
             <strong id="mmef-probability" class="probability">—</strong>
-            <p id="mmef-result-note" class="result-note">Optional MMEF not entered.</p>
+            <p id="mmef-result-note" class="result-note">Enter post-bronchodilator MMEF to calculate this model.</p>
           </div>
         </div>
 
-        <p class="concurrent-note">Concurrent CT outcome: 18-segment mucus plug score ≥4. Not a future-risk model.</p>
+        <p class="concurrent-note">High mucus plug burden was defined as an 18-segment mucus plug score ≥4.</p>
       </section>
     </div>
 
-    <details id="model-information" class="information">
-      <summary>Model information</summary>
-      <div class="details-content">
-        <table class="model-table">
-          <thead>
-            <tr><th>Performance</th><th>Clinical</th><th>Clinical + MMEF</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>AUROC</td><td>0.770</td><td>0.832</td></tr>
-            <tr><td>PR-AUC</td><td>0.496</td><td>0.598</td></tr>
-            <tr><td>Brier score</td><td>0.144</td><td>0.126</td></tr>
-          </tbody>
-        </table>
-        <p class="details-note">Repeated out-of-fold estimates in the development cohort.</p>
-      </div>
-    </details>
-
     <details id="model-equations" class="information">
-      <summary>Model equation</summary>
+      <summary>Model equations</summary>
       <div class="details-content">
-        <strong>Clinical model</strong>
-        <code class="equation">LP = -2.960 + 1.161 × ln(1 + ED) + 1.132 × NasalPolyps + 0.315 × GINA - 0.565 × Female + 0.624 × BPD + 0.836 × CurrentSmoking</code>
-        <strong>Clinical model with MMEF</strong>
-        <code class="equation">LP = -0.411 + 1.292 × ln(1 + ED) + 1.256 × NasalPolyps + 0.175 × GINA - 0.764 × Female + 0.441 × BPD + 0.681 × CurrentSmoking - 0.401 × (MMEF / 10)</code>
-        <p class="details-note">Probability = 1 / (1 + exp(-LP)). Smoking is coded as Current = 1; Never, Former, and Indeterminate = 0.</p>
+        <div id="equations-content"></div>
+        <p class="details-note">Probability = 1 / (1 + exp(-LP)). ED uses ln(1 + patient-days). Female and current smoking are coded as 1; male and other smoking categories as 0. Heart rate and MMEF use raw units.</p>
       </div>
     </details>
 
@@ -685,211 +660,15 @@
   </main>
 
   <footer class="page-footer">
-    <p>Research use only · No independent external validation · Do not replace clinically indicated chest CT.</p>
+    <p><strong>Research use only.</strong> These models were developed and internally evaluated in a single-center retrospective cohort of adults hospitalized with asthma. They have not undergone independent external validation. Estimated probabilities should not be used as a substitute for clinically indicated CT or as a stand-alone basis for treatment decisions.</p>
     <p class="privacy-line">No patient data are transmitted or stored.</p>
-    <p>Research model · Version 1.0 · August 2026</p>
+    <p>Research model · 20 September 2026 · <a href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator">Source code</a></p>
   </footer>
 
   <script>
+/*__MODEL_PARAMETERS__*/
 /*__MODEL_ENGINE__*/
-  </script>
-  <script>
-    (function initializeCalculator() {
-      "use strict";
-
-      const form = document.getElementById("calculator-form");
-      const summaryError = document.getElementById("form-summary-error");
-      const clinicalProbabilityElement = document.getElementById("clinical-probability");
-      const mmefProbabilityElement = document.getElementById("mmef-probability");
-      const mmefResultNote = document.getElementById("mmef-result-note");
-      const mmefWarning = document.getElementById("mmef-warning");
-      const calculationError = document.getElementById("calculation-error");
-      const calculateButton = document.getElementById("calculate-button");
-
-      const fieldDefinitions = [
-        { id: "ed-days", error: "ed-days-error", validate: validateEd },
-        { id: "gina-step", error: "gina-step-error", validate: validateGina },
-        { id: "smoking-status", error: "smoking-status-error", validate: validateSmoking },
-        { group: "nasal-polyps-group", radio: "nasal_polyps", error: "nasal-polyps-error", validate: validateRadio },
-        { group: "sex-group", radio: "female", error: "sex-error", validate: validateRadio },
-        { group: "bpd-group", radio: "breathing_pattern_disorder", error: "bpd-error", validate: validateRadio },
-      ];
-
-      function selectedRadio(name) {
-        return form.querySelector(`input[name="${name}"]:checked`);
-      }
-
-      function validateEd() {
-        const raw = document.getElementById("ed-days").value.trim();
-        const value = Number(raw);
-        return raw !== "" && Number.isInteger(value) && value >= 0 && value <= 365;
-      }
-
-      function validateGina() {
-        return ["1", "2", "3", "4", "5"].includes(document.getElementById("gina-step").value);
-      }
-
-      function validateSmoking() {
-        return ["never", "former", "current", "indeterminate"].includes(document.getElementById("smoking-status").value);
-      }
-
-      function validateRadio(definition) {
-        return selectedRadio(definition.radio) !== null;
-      }
-
-      function setFieldState(definition, valid) {
-        const error = document.getElementById(definition.error);
-        error.hidden = valid;
-        if (definition.id) {
-          document.getElementById(definition.id).setAttribute("aria-invalid", String(!valid));
-        } else {
-          document.getElementById(definition.group).classList.toggle("invalid", !valid);
-        }
-      }
-
-      function validateMMEF() {
-        const input = document.getElementById("mmef");
-        const error = document.getElementById("mmef-error");
-        const raw = input.value.trim();
-        const valid = raw === "" || (Number.isFinite(Number(raw)) && Number(raw) > 0);
-        input.setAttribute("aria-invalid", String(!valid));
-        error.hidden = valid;
-        mmefWarning.hidden = !(valid && raw !== "" && Number(raw) > 200);
-        return valid;
-      }
-
-      function validateInputs() {
-        let firstInvalid = null;
-        for (const definition of fieldDefinitions) {
-          const valid = definition.validate(definition);
-          setFieldState(definition, valid);
-          if (!valid && !firstInvalid) {
-            firstInvalid = definition.id
-              ? document.getElementById(definition.id)
-              : document.querySelector(`#${definition.group} input`);
-          }
-        }
-        const mmefValid = validateMMEF();
-        summaryError.hidden = firstInvalid === null;
-        return { valid: firstInvalid === null, mmefValid, firstInvalid };
-      }
-
-      function collectValues() {
-        const smokingStatus = document.getElementById("smoking-status").value;
-        const mmefRaw = document.getElementById("mmef").value.trim();
-        return {
-          ed_patient_days: Number(document.getElementById("ed-days").value),
-          nasal_polyps: Number(selectedRadio("nasal_polyps").value),
-          gina_step: Number(document.getElementById("gina-step").value),
-          female: Number(selectedRadio("female").value),
-          breathing_pattern_disorder: Number(selectedRadio("breathing_pattern_disorder").value),
-          current_smoking: smokingStatus === "current" ? 1 : 0,
-          mmef_percent_predicted: mmefRaw === "" ? null : Number(mmefRaw),
-        };
-      }
-
-      function getModelEngine() {
-        const engine = globalThis.MucusPlugModel;
-        if (!engine || typeof engine.clinicalProbability !== "function" || typeof engine.mmefProbability !== "function") {
-          throw new Error("Model engine is not available");
-        }
-        return engine;
-      }
-
-      function calculateClinicalProbability(values) {
-        return getModelEngine().clinicalProbability(values);
-      }
-
-      function calculateMMEFProbability(values) {
-        return getModelEngine().mmefProbability(values);
-      }
-
-      function formatProbability(value) {
-        return `${(value * 100).toFixed(1)}%`;
-      }
-
-      function displayResults(values, mmefValid) {
-        const clinical = calculateClinicalProbability(values);
-        clinicalProbabilityElement.textContent = formatProbability(clinical);
-        if (values.mmef_percent_predicted === null) {
-          mmefProbabilityElement.textContent = "—";
-          mmefResultNote.textContent = "Optional MMEF not entered.";
-          return;
-        }
-        if (!mmefValid) {
-          mmefProbabilityElement.textContent = "—";
-          mmefResultNote.textContent = "Enter MMEF greater than 0 to calculate this model.";
-          return;
-        }
-        const withMMEF = calculateMMEFProbability(values);
-        mmefProbabilityElement.textContent = formatProbability(withMMEF);
-        mmefResultNote.textContent = "With post-bronchodilator MMEF.";
-      }
-
-      function clearResults() {
-        clinicalProbabilityElement.textContent = "—";
-        mmefProbabilityElement.textContent = "—";
-        mmefResultNote.textContent = "Optional MMEF not entered.";
-      }
-
-      function resetCalculator() {
-        summaryError.hidden = true;
-        mmefWarning.hidden = true;
-        calculationError.hidden = true;
-        for (const definition of fieldDefinitions) {
-          setFieldState(definition, true);
-        }
-        document.getElementById("mmef").setAttribute("aria-invalid", "false");
-        document.getElementById("mmef-error").hidden = true;
-        clearResults();
-      }
-
-      function runCalculation() {
-        calculationError.hidden = true;
-        const validation = validateInputs();
-        if (!validation.valid) {
-          clearResults();
-          validation.firstInvalid.focus();
-          return;
-        }
-        try {
-          displayResults(collectValues(), validation.mmefValid);
-          if (!validation.mmefValid) {
-            document.getElementById("mmef").focus();
-          }
-        } catch (error) {
-          clearResults();
-          calculationError.hidden = false;
-          console.error(error);
-        }
-      }
-
-      calculateButton.addEventListener("click", (event) => {
-        event.preventDefault();
-        runCalculation();
-      });
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        runCalculation();
-      });
-
-      form.addEventListener("reset", () => {
-        clearResults();
-        summaryError.hidden = true;
-        mmefWarning.hidden = true;
-        calculationError.hidden = true;
-        window.setTimeout(resetCalculator, 0);
-      });
-
-      document.getElementById("mmef").addEventListener("input", validateMMEF);
-      window.CalculatorApp = Object.freeze({
-        validateInputs,
-        calculateClinicalProbability,
-        calculateMMEFProbability,
-        resetCalculator,
-      });
-    })();
+/*__CALCULATOR_UI__*/
   </script>
 </body>
 </html>

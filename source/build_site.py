@@ -1,29 +1,18 @@
-"""Build the self-contained static calculator page."""
-
-from __future__ import annotations
-
+"""Generate identical offline-capable root and Pages entry points."""
 from pathlib import Path
-
-
+import json
 ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE = ROOT / "source" / "index.template.html"
-ENGINE = ROOT / "source" / "model_engine.js"
-OUTPUT = ROOT / "docs" / "index.html"
-MARKER = "/*__MODEL_ENGINE__*/"
-
-
-def build() -> Path:
-    template = TEMPLATE.read_text(encoding="utf-8")
-    engine = ENGINE.read_text(encoding="utf-8")
-    if template.count(MARKER) != 1:
-        raise RuntimeError("The HTML template must contain exactly one model-engine marker")
-    document = template.replace(MARKER, engine)
-    if any(token in document for token in ('src="http', "src='http", 'href="http', "href='http")):
-        raise RuntimeError("External resources are not allowed in the built page")
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(document, encoding="utf-8", newline="\n")
-    return OUTPUT
-
-
-if __name__ == "__main__":
-    print(build())
+def build():
+    html = (ROOT/'source/index.template.html').read_text(encoding='utf-8')
+    params = json.loads((ROOT/'model_parameters_final.json').read_text(encoding='utf-8'))
+    parts = {'/*__MODEL_PARAMETERS__*/':'globalThis.ModelParameters = '+json.dumps(params)+';',
+             '/*__MODEL_ENGINE__*/':(ROOT/'source/model_engine.js').read_text(encoding='utf-8'),
+             '/*__CALCULATOR_UI__*/':(ROOT/'source/calculator_ui.js').read_text(encoding='utf-8')}
+    for marker,value in parts.items():
+        assert html.count(marker)==1, marker
+        html=html.replace(marker,value)
+    for path in [ROOT/'index.html',ROOT/'docs/index.html']:
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(html,encoding='utf-8',newline='\n')
+    return ROOT/'docs/index.html'
+if __name__=='__main__': print(build())

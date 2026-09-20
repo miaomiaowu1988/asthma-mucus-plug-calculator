@@ -1,139 +1,74 @@
-import { createRequire } from "node:module";
-import fs from "node:fs";
-import path from "node:path";
-import process from "node:process";
-import { pathToFileURL } from "node:url";
-
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
-
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(.:)/, "$1")), "..");
-const defaultHtml = path.join(root, "docs", "index.html");
-const defaultUrl = pathToFileURL(defaultHtml).href;
-const templateUrl = pathToFileURL(path.join(root, "source", "index.template.html")).href;
-const outputDir = path.join(root, "test_artifacts", "screenshots");
-const urlIndex = process.argv.indexOf("--url");
-const targetUrl = urlIndex >= 0 ? process.argv[urlIndex + 1] : defaultUrl;
-const browserIndex = process.argv.indexOf("--browser");
-const requestedBrowser = browserIndex >= 0 ? process.argv[browserIndex + 1] : null;
-
-const browserChannels = requestedBrowser ? [requestedBrowser] : ["chrome", "msedge"];
-const viewports = [
-  { name: "desktop-1920", width: 1920, height: 1080 },
-  { name: "desktop-1366", width: 1366, height: 768 },
-  { name: "mobile-390", width: 390, height: 844 },
-];
-
-function expect(condition, message) {
-  if (!condition) {
-    throw new Error(message);
+import {createRequire} from 'node:module';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url);
+const {chromium}=require('playwright');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const url=process.argv[2] || pathToFileURL(path.join(root,'docs/index.html')).href;
+const online=url.startsWith('http');
+const out=path.join(root,'test_artifacts',online?'online':'local'); fs.mkdirSync(out,{recursive:true});
+const lines=fs.readFileSync(path.join(root,'tests/calculator_test_cases.csv'),'utf8').trim().split(/\r?\n/);
+const headers=lines.shift().split(',');
+const cases=lines.map(line=>Object.fromEntries(line.split(',').map((v,i)=>[headers[i],Number(v)])));
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const errors=[],requests=[],results=[],edges=[];
+const context=await browser.newContext({viewport:{width:1366,height:900}});
+const page=await context.newPage();
+page.on('pageerror',error=>errors.push(error.message));
+page.on('console',msg=>{if(msg.type()==='error') errors.push(msg.text());});
+page.on('request',req=>requests.push({url:req.url(),type:req.resourceType()}));
+async function fill(x) {
+  await page.locator('#ed-days').fill(String(x.ed_patient_days));
+  await page.locator('#gina-step').selectOption(String(x.gina_step));
+  await page.locator(`input[name="nasal_polyps"][value="${x.nasal_polyps}"]`).check({force:true});
+  await page.locator(`input[name="female"][value="${x.female}"]`).check({force:true});
+  await page.locator('#heart-rate').fill(String(x.heart_rate_bpm));
+  await page.locator('#smoking-status').selectOption(String(x.current_smoking));
+  await page.locator('#mmef').fill(x.mmef_percent_predicted===null?'':String(x.mmef_percent_predicted));
+}
+async function click() {await page.locator('#calculate-button').click();}
+async function probabilities() {
+  return page.evaluate(()=>['clinical-probability','mmef-probability'].map(id=>{
+    const el=document.getElementById(id);return {raw:el.dataset.probability===undefined?null:Number(el.dataset.probability),text:el.textContent};
+  }));
+}
+try {
+  await page.goto(url,{waitUntil:'networkidle'});
+  assert.equal(await page.locator('#mmef').inputValue(),'');
+  await click(); assert.ok(await page.locator('#form-summary-error').isVisible()); edges.push('All missing inputs rejected');
+  for(const x of cases) {
+    await fill(x); await click(); const [a,b]=await probabilities();
+    const error=Math.max(Math.abs(a.raw-x.python_clinical_probability),Math.abs(b.raw-x.python_clinical_mmef_probability));
+    assert.ok(a.raw!==null&&b.raw!==null&&error<1e-10,`Case ${x.case_id}: ${error}`);
+    for(const p of [a,b]) {assert.ok(p.raw>=0&&p.raw<=1);assert.equal(p.text,(p.raw*100).toFixed(1)+'%');}
+    results.push({...x,browser_clinical_probability:a.raw,browser_clinical_mmef_probability:b.raw,absolute_error:error,PASS:true});
   }
-}
-
-async function completeRequiredClinicalInputs(page) {
-  await page.locator("#ed-days").fill("0");
-  await page.locator('input[name="nasal_polyps"][value="0"]').check();
-  await page.locator("#gina-step").selectOption("1");
-  await page.locator('input[name="female"][value="0"]').check();
-  await page.locator('input[name="breathing_pattern_disorder"][value="0"]').check();
-  await page.locator("#smoking-status").selectOption("never");
-}
-
-async function exerciseCalculator(page) {
-  expect((await page.title()) === "High Mucus Plug Burden Calculator", "Unexpected document title");
-  await page.locator("#calculate-button").click();
-  expect(await page.locator("#form-summary-error").isVisible(), "Missing-input summary was not shown");
-
-  await completeRequiredClinicalInputs(page);
-  await page.locator("#calculate-button").click();
-  expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical-only display mismatch");
-  expect((await page.locator("#mmef-probability").textContent()).trim() === "—", "MMEF result should be unavailable");
-  expect((await page.locator("#mmef-result-note").textContent()).includes("Optional MMEF not entered"), "Missing-MMEF instruction absent");
-
-  await page.locator("#mmef").fill("0");
-  await page.locator("#calculate-button").click();
-  expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical result should remain available when MMEF is invalid");
-  expect((await page.locator("#mmef-probability").textContent()).trim() === "—", "MMEF=0 must not be calculated");
-  expect(await page.locator("#mmef-error").isVisible(), "MMEF=0 validation error absent");
-  expect((await page.locator("#mmef-result-note").textContent()).includes("greater than 0"), "Invalid-MMEF result instruction absent");
-
-  await page.locator("#mmef").fill("30");
-  await page.locator("#calculate-button").click();
-  expect((await page.locator("#clinical-probability").textContent()).trim() === "6.6%", "Clinical result changed after MMEF entry");
-  expect((await page.locator("#mmef-probability").textContent()).trim() === "19.2%", "MMEF display mismatch");
-  expect((await page.locator("#mmef-result-note").textContent()).includes("With post-bronchodilator MMEF"), "MMEF result note mismatch");
-
-  await page.locator("#mmef").fill("201");
-  await page.locator("#calculate-button").click();
-  expect(await page.locator("#mmef-warning").isVisible(), "MMEF >200 verification warning absent");
-  expect((await page.locator("#mmef-probability").textContent()).trim() !== "—", "MMEF >200 should remain calculable");
-
-  await page.locator("#model-information").evaluate((element) => { element.open = true; });
-  await page.locator("#model-equations").evaluate((element) => { element.open = true; });
-  await page.locator("#model-information").evaluate((element) => { element.open = false; });
-  await page.locator("#model-equations").evaluate((element) => { element.open = false; });
-
-  await page.locator("#reset-button").click();
-  expect((await page.locator("#ed-days").inputValue()) === "", "Reset did not clear ED");
-  expect((await page.locator("#gina-step").inputValue()) === "", "Reset did not clear GINA");
-  expect((await page.locator("#clinical-probability").textContent()).trim() === "—", "Reset did not clear result");
-}
-
-async function runBrowser(channel) {
-  const browser = await chromium.launch({ channel, headless: true });
-  const browserResult = { channel, viewports: [], templateFailureMessage: null };
-  try {
-    for (const viewport of viewports) {
-      const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
-      const page = await context.newPage();
-      const requests = [];
-      page.on("request", (request) => requests.push(request.url()));
-      await page.goto(targetUrl, { waitUntil: "load" });
-      await exerciseCalculator(page);
-      await completeRequiredClinicalInputs(page);
-      await page.locator("#mmef").fill("60");
-      await page.locator("#calculate-button").click();
-      const layout = await page.evaluate(() => ({
-        documentWidth: document.documentElement.scrollWidth,
-        viewportWidth: document.documentElement.clientWidth,
-        bodyWidth: document.body.scrollWidth,
-        edWidth: document.getElementById("ed-days").getBoundingClientRect().width,
-        mmefWidth: document.getElementById("mmef").getBoundingClientRect().width,
-      }));
-      expect(layout.documentWidth <= layout.viewportWidth, `${channel} ${viewport.name} has horizontal overflow`);
-      expect(layout.bodyWidth <= layout.viewportWidth, `${channel} ${viewport.name} body has horizontal overflow`);
-      expect(Math.abs(layout.edWidth - 170) < 0.5, `${channel} ${viewport.name} ED width is not 170 px`);
-      expect(Math.abs(layout.mmefWidth - 170) < 0.5, `${channel} ${viewport.name} MMEF width is not 170 px`);
-      const nonDocumentRequests = requests.filter((requestUrl) => requestUrl !== targetUrl);
-      expect(nonDocumentRequests.length === 0, `${channel} made external/subresource requests: ${nonDocumentRequests.join(", ")}`);
-      const screenshot = path.join(outputDir, `${channel}-${viewport.name}.png`);
-      await page.screenshot({ path: screenshot, fullPage: true });
-      browserResult.viewports.push({ ...viewport, layout, requests: requests.length, screenshot });
-      await context.close();
-    }
-    if (targetUrl === defaultUrl) {
-      const context = await browser.newContext({ viewport: { width: 1366, height: 768 } });
-      const page = await context.newPage();
-      await page.goto(templateUrl, { waitUntil: "load" });
-      await completeRequiredClinicalInputs(page);
-      await page.locator("#calculate-button").click();
-      expect(await page.locator("#calculation-error").isVisible(), `${channel} template did not show its initialization error`);
-      browserResult.templateFailureMessage = (await page.locator("#calculation-error").textContent()).trim();
-      await context.close();
-    }
-  } finally {
-    await browser.close();
+  const last=await probabilities();for(let i=0;i<5;i++) await click();assert.deepEqual(await probabilities(),last);edges.push('Repeated clicks stable');
+  await fill({...cases[0],mmef_percent_predicted:null});await click();let p=await probabilities();assert.ok(p[0].raw!==null&&p[1].raw===null);edges.push('Missing MMEF: clinical only');
+  await page.locator('#mmef').fill('-1');await click();p=await probabilities();assert.ok(p[0].raw!==null&&p[1].raw===null);assert.ok(await page.locator('#mmef-error').isVisible());edges.push('Negative MMEF rejected, clinical available');
+  for(const [id,value] of [['ed-days','-1'],['ed-days','1.5'],['heart-rate','0'],['heart-rate','-5'],['heart-rate','']]) {
+    await fill(cases[0]);await page.locator('#'+id).fill(value);await click();assert.equal((await probabilities())[0].raw,null);edges.push(id+'='+JSON.stringify(value)+' rejected');
   }
-  return browserResult;
-}
-
-fs.mkdirSync(outputDir, { recursive: true });
-const results = [];
-for (const channel of browserChannels) {
-  results.push(await runBrowser(channel));
-}
-const report = { targetUrl, browsers: results, pass: true };
-const reportPath = path.join(root, "test_artifacts", "browser_qa.json");
-fs.mkdirSync(path.dirname(reportPath), { recursive: true });
-fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+  // Text-type injection verifies JS validation independently of HTML number controls.
+  for(const id of ['ed-days','heart-rate','mmef']) {
+    await fill(cases[0]);await page.locator('#'+id).evaluate(el=>el.type='text');await page.locator('#'+id).fill('abc');await click();
+    p=await probabilities();assert.equal(p[id==='mmef'?1:0].raw,null);await page.locator('#'+id).evaluate(el=>el.type='number');edges.push(id+' nonnumeric rejected');
+  }
+  await fill({...cases[0],ed_patient_days:1000,mmef_percent_predicted:201});await click();assert.ok((await probabilities())[1].raw!==null);edges.push('Large valid inputs not clipped');
+  await page.locator('#reset-button').click();assert.equal((await probabilities())[0].raw,null);assert.equal(await page.locator('#heart-rate').inputValue(),'');edges.push('Reset clears inputs/results');
+  const layouts=[];
+  for(const viewport of [{width:1366,height:900},{width:390,height:844},{width:320,height:740}]) {
+    await page.setViewportSize(viewport);await fill(cases[7]);await click();
+    const layout=await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth,ed:document.getElementById('ed-days').getBoundingClientRect().width}));
+    assert.ok(layout.scroll<=layout.width);assert.equal(layout.ed,170);layouts.push(layout);
+    await page.screenshot({path:path.join(out,`viewport-${viewport.width}.png`),fullPage:true});
+  }
+  assert.equal(await page.locator('#calculation-error').isVisible(),false);
+  assert.equal(await page.locator('a[href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator"]').count(),1);
+  assert.deepEqual(errors,[]);assert.ok(requests.every(r=>r.type==='document'));
+  const head=Object.keys(results[0]);fs.writeFileSync(path.join(out,'browser_validation.csv'),[head.join(','),...results.map(r=>head.map(k=>r[k]).join(','))].join('\n')+'\n');
+  const report={url,pass:true,cases:results.length,max_error:Math.max(...results.map(r=>r.absolute_error)),edges,layouts,errors,requests,modelVersion:await page.evaluate(()=>ModelParameters.version)};
+  fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+} finally {await browser.close();}
