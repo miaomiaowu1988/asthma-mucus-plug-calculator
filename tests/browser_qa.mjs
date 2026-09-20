@@ -78,7 +78,7 @@ try {
     await page.locator('#about-model summary').click();
   }
   assert.equal(await page.locator('#calculation-error').isVisible(),false);
-  assert.equal(await page.locator('a[href="https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator"]').count(),1);
+  assert.equal(await page.locator('a[href="https://github.com/research-jay/asthma-mucus-plug-calculator"]').count(),1);
   assert.deepEqual(errors,[]);assert.ok(requests.every(r=>r.type==='document'));
   const head=Object.keys(results[0]);fs.writeFileSync(path.join(out,'browser_validation.csv'),[head.join(','),...results.map(r=>head.map(k=>r[k]).join(','))].join('\n')+'\n');
   const report={url,pass:true,cases:results.length,max_error:Math.max(...results.map(r=>r.absolute_error)),edges,layouts,errors,requests,modelVersion:await page.evaluate(()=>ModelParameters.version)};

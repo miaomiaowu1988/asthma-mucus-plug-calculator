@@ -34,4 +34,4 @@ Open `index.html` or `docs/index.html`, not the source template. GitHub Pages se
 
 All calculations run locally in the browser. No API calls, analytics, cookies, browser storage, or patient-data transmission. Tests contain only synthetic inputs. Public parameters contain no patient records.
 
-[Calculator](https://miaomiaowu1988.github.io/asthma-mucus-plug-calculator/) | [Source](https://github.com/miaomiaowu1988/asthma-mucus-plug-calculator)
+[Calculator](https://research-jay.github.io/asthma-mucus-plug-calculator/) | [Source](https://github.com/research-jay/asthma-mucus-plug-calculator)
