@@ -22,7 +22,7 @@ FORBIDDEN_PATTERNS = {
     "cookies": r"document\.cookie",
     "analytics": r"google-analytics|googletagmanager|gtag\s*\(|plausible\.io|matomo",
     "external_script": r"<script[^>]+src\s*=",
-    "external_stylesheet": r"<link[^>]+href\s*=",
+    "external_resource_link": r"<link[^>]+href\s*=\s*[\"'](?!data:)",
     "external_form": r"<form[^>]+action\s*=",
 }
 
